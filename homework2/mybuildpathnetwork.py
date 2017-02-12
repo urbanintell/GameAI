@@ -43,6 +43,7 @@ def myBuildPathNetwork(pathnodes, world, agent = None):
 		for i in range(0,len(points)-1):
 			j = i+1
 			line_list.append((points[i],points[j]))
+		line_list.append((points[-1],points[0]))
 
 	for node in pathnodes:
 		tmp = copy.copy(pathnodes)
