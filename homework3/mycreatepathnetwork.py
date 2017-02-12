@@ -34,8 +34,63 @@ def getEdges(arr, i):
 		return [arr[i-1],arr[i+1]]
 
 
+def myBuildPathNetwork(pathnodes,world,agent=None):
+	lines = []
+	
+	obstacles = world.getObstacles()
+	obstacle_points = []
+	point_list = []
+	line_list = []
+	point_dict = {}
+	maxRadius = agent.getMaxRadius()
+	
+	for obstacle in obstacles:
+		point_list.append(obstacle.getPoints())
+
+	for points in point_list:
+		for point in points:
+			obstacle_points.append(point)
+		for i in range(0,len(points)-1):
+			j = i+1
+			line_list.append((points[i],points[j]))
+		line_list.append((points[-1],points[0]))
+
+	for node in pathnodes:
+		tmp = copy.copy(pathnodes)
+		tmp.remove(node)
+
+		while tmp and findClosestUnobstructed(node,tmp,line_list):
+			closest = findClosestUnobstructed(node,tmp,line_list)
+
+			if point_dict.get(node,None):
+				arr = point_dict[node]
+				arr.append(closest)
+				point_dict[node] = arr
+			else:
+				arr = []
+				arr.append(closest)
+				point_dict[node] = arr
+
+			tmp.remove(closest)
+
+	for source in pathnodes:
+		if point_dict.get(source,None):
+			target_list = point_dict[source]
+			for target in target_list:
+				skip = False
+				for point in obstacle_points:
+					if minimumDistance((source,target),point) < maxRadius:
+						skip = True
+				if not skip:
+					lines.append((source,target))
+			
+			point_dict.pop(source, None)
+
+	return lines
+
+
 # Creates a pathnode network that connects the midpoints of each navmesh together
-def myCreatePathNetwork(world, agent = None):
+def myCreatePathNetwork(world, agent=None):
 	nodes = []
 	edges = []
 	polys = []
@@ -117,18 +172,19 @@ def myCreatePathNetwork(world, agent = None):
 			nodes.append((x,y))
 			drawCross(world.debug,(x,y),(0,0,255),2,1)
 
-		if (skip_arr[0] and skip_arr[1]) or (skip_arr[0] and skip_arr[2]) or (skip_arr[1] and skip_arr[2]):
-			polys.append(triplet)
-		elif skip_arr[0] and skip_arr[2]:
-			polys.append(triplet)
-		elif skip_arr[0] and not skip_arr[1] and not skip_arr[2]:
-			polys.append((triplet[0],triplet[1]))
-		elif skip_arr[1] and not skip_arr[0] and not skip_arr[2]:
-			polys.append((triplet[0],triplet[2]))
-		elif skip_arr[2] and not skip_arr[0] and not skip_arr[1]:
-			polys.append((triplet[1],triplet[2]))
 
+		# if (skip_arr[0] and skip_arr[1]) or (skip_arr[0] and skip_arr[2]) or (skip_arr[1] and skip_arr[2]):
+		# 	polys.append(triplet)
+		# elif skip_arr[0] and skip_arr[2]:
+		# 	polys.append(triplet)
+		# elif skip_arr[0] and not skip_arr[1] and not skip_arr[2]:
+		# 	polys.append((triplet[0],triplet[1]))
+		# elif skip_arr[1] and not skip_arr[0] and not skip_arr[2]:
+		# 	polys.append((triplet[0],triplet[2]))
+		# elif skip_arr[2] and not skip_arr[0] and not skip_arr[1]:
+		# 	polys.append((triplet[1],triplet[2]))
 
+	edges = myBuildPathNetwork(nodes,world,agent)
 	# for points in point_list:
 	# 	for i in range(len(points)):
 	# 		tmp_list = copy.copy(line_list)
