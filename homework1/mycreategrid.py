@@ -34,6 +34,7 @@ def myCreateGrid(world, cellsize):
 	obstacles = world.getObstacles()
 	point_list = []
 	line_list = []
+	
 	for obstacle in obstacles:
 		point_list.append(obstacle.getPoints())
 
