@@ -98,12 +98,35 @@ def myCreatePathNetwork(world, agent = None):
 		if not skip_arr[0]:
 			pygame.draw.line(world.debug,(0,255,0),triplet[0],triplet[1],1)
 			lines.append((triplet[0],triplet[1]))
+			x = (triplet[0][0] + triplet[1][0])/2.0
+			y = (triplet[0][1] + triplet[1][1])/2.0
+			nodes.append((x,y))
+			drawCross(world.debug,(x,y),(0,0,255),2,1)
 		if not skip_arr[1]:
 			pygame.draw.line(world.debug,(0,255,0),triplet[0],triplet[2],1)
 			lines.append((triplet[0],triplet[2]))
+			x = (triplet[0][0] + triplet[2][0])/2.0
+			y = (triplet[0][1] + triplet[2][1])/2.0
+			nodes.append((x,y))
+			drawCross(world.debug,(x,y),(0,0,255),2,1)
 		if not skip_arr[2]:
 			pygame.draw.line(world.debug,(0,255,0),triplet[1],triplet[2],1)
 			lines.append((triplet[1],triplet[2]))
+			x = (triplet[1][0] + triplet[2][0])/2.0
+			y = (triplet[1][1] + triplet[2][1])/2.0
+			nodes.append((x,y))
+			drawCross(world.debug,(x,y),(0,0,255),2,1)
+
+		if (skip_arr[0] and skip_arr[1]) or (skip_arr[0] and skip_arr[2]) or (skip_arr[1] and skip_arr[2]):
+			polys.append(triplet)
+		elif skip_arr[0] and skip_arr[2]:
+			polys.append(triplet)
+		elif skip_arr[0] and not skip_arr[1] and not skip_arr[2]:
+			polys.append((triplet[0],triplet[1]))
+		elif skip_arr[1] and not skip_arr[0] and not skip_arr[2]:
+			polys.append((triplet[0],triplet[2]))
+		elif skip_arr[2] and not skip_arr[0] and not skip_arr[1]:
+			polys.append((triplet[1],triplet[2]))
 
 
 	# for points in point_list:
