@@ -107,8 +107,6 @@ def myCreatePathNetwork(world, agent=None):
 	corners = [(0,0),(dim[0],0),dim,(0,dim[1])]
 	triplets = []
 	lines = world.lines
-	
-	# build up point list and line list from obstacles
 
 	for obstacle in obstacles:
 		point_list.append(obstacle.getPoints())
@@ -172,92 +170,19 @@ def myCreatePathNetwork(world, agent=None):
 			nodes.append((x,y))
 			drawCross(world.debug,(x,y),(0,0,255),2,1)
 
-
-		# if (skip_arr[0] and skip_arr[1]) or (skip_arr[0] and skip_arr[2]) or (skip_arr[1] and skip_arr[2]):
-		# 	polys.append(triplet)
-		# elif skip_arr[0] and skip_arr[2]:
-		# 	polys.append(triplet)
-		# elif skip_arr[0] and not skip_arr[1] and not skip_arr[2]:
-		# 	polys.append((triplet[0],triplet[1]))
-		# elif skip_arr[1] and not skip_arr[0] and not skip_arr[2]:
-		# 	polys.append((triplet[0],triplet[2]))
-		# elif skip_arr[2] and not skip_arr[0] and not skip_arr[1]:
-		# 	polys.append((triplet[1],triplet[2]))
+		if (not skip_arr[0] and not skip_arr[1]) or (not skip_arr[0] and not skip_arr[2]) or (not skip_arr[1] and not skip_arr[2]):
+			polys.append(triplet)
+		elif not skip_arr[0] and not skip_arr[2]:
+			polys.append(triplet)
+		elif not skip_arr[0] and skip_arr[1] and skip_arr[2]:
+			polys.append((triplet[0],triplet[1]))
+		elif not skip_arr[1] and skip_arr[0] and skip_arr[2]:
+			polys.append((triplet[0],triplet[2]))
+		elif not skip_arr[2] and skip_arr[0] and skip_arr[1]:
+			polys.append((triplet[1],triplet[2]))
 
 	edges = myBuildPathNetwork(nodes,world,agent)
-	# for points in point_list:
-	# 	for i in range(len(points)):
-	# 		tmp_list = copy.copy(line_list)
-	# 		edge_successors = getEdges(points,i)
-	# 		corners = [(0,0),(dim[0],0),dim,(0,dim[1])]
 
-	# 		if (points[i],edge_successors[0]) in tmp_list:
-	# 			tmp_list.remove((points[i],edge_successors[0]))
-	# 		elif (edge_successors[0],points[i]):
-	# 			tmp_list.remove((edge_successors[0],points[i]))
-
-	# 		if (points[i],edge_successors[1]) in tmp_list:
-	# 			tmp_list.remove((points[i],edge_successors[1]))
-	# 		elif (edge_successors[1],points[i]):
-	# 			tmp_list.remove((edge_successors[1],points[i]))
-
-	# 		nearest_corner = findClosestUnobstructed(points[i],corners,tmp_list)
-
-	# 		if nearest_corner:
-	# 			if len(new_lines) > 0:
-	# 				# skip = False
-	# 				# for line in new_lines:
-	# 				# 	if calculateIntersectPoint(line[0],line[1],nearest_corner,points[i]):
-	# 				# 		pt = calculateIntersectPoint(line[0],line[1],nearest_corner,points[i])
-	# 				# 		if pt not in corners:
-	# 				# 			skip = True
-	# 				# 			break
-	# 				# if not skip:
-	# 				# Try to Build Polygons (triangles)
-
-	# 				pygame.draw.line(world.debug,(0,255,0),points[i],nearest_corner,1)
-	# 				new_lines.append((points[i],nearest_corner))
-	# 			else:
-	# 				pygame.draw.line(world.debug,(0,255,0),points[i],nearest_corner,1)
-	# 				new_lines.append((points[i],nearest_corner))
-
-	# 			skip_first = False
-	# 			skip_second = False
-	# 			first_count = 0
-	# 			second_count = 0
-	# 			for j in range(len(points)-1):
-	# 				if calculateIntersectPoint(points[j],points[j+1],nearest_corner,edge_successors[0]):
-	# 					first_count += 1
-	# 				if calculateIntersectPoint(points[j],points[j+1],nearest_corner,edge_successors[1]):
-	# 					second_count += 1
-
-	# 			if calculateIntersectPoint(points[-1],points[0],nearest_corner,edge_successors[0]):
-	# 				first_count += 1
-	# 			if calculateIntersectPoint(points[-1],points[0],nearest_corner,edge_successors[1]):
-	# 				second_count += 1
-
-	# 			if first_count == 2:
-	# 				for line in new_lines:
-	# 					if calculateIntersectPoint(line[0],line[1],nearest_corner,edge_successors[0]):
-	# 						pt = calculateIntersectPoint(line[0],line[1],nearest_corner,edge_successors[0])
-	# 						if pt not in corners:	
-	# 							skip_first = True
-	# 							break
-	# 				if not skip_first:
-	# 					pygame.draw.line(world.debug,(0,255,0),nearest_corner,edge_successors[0],1)
-	# 					new_lines.append((nearest_corner,edge_successors[0]))
-	# 			if second_count == 2:
-	# 				for line in new_lines:
-	# 					if calculateIntersectPoint(line[0],line[1],nearest_corner,edge_successors[1]):
-	# 						pt = calculateIntersectPoint(line[0],line[1],nearest_corner,edge_successors[1])
-	# 						if pt not in corners:
-	# 							skip_second = True
-	# 							break
-	# 				if not skip_second:
-	# 					pygame.draw.line(world.debug,(0,255,0),nearest_corner,edge_successors[1],1)
-	# 					new_lines.append((nearest_corner,edge_successors[1]))
-
-
-	return nodes, edges, polys
+	return nodes,edges,polys
 
 	
