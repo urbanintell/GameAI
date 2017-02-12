@@ -28,17 +28,21 @@ def myBuildPathNetwork(pathnodes, world, agent = None):
 	lines = []
 	
 	obstacles = world.getObstacles()
+	obstacle_points = []
 	point_list = []
 	line_list = []
 	point_dict = {}
+	maxRadius = agent.getMaxRadius()
 	
 	for obstacle in obstacles:
 		point_list.append(obstacle.getPoints())
 
 	for points in point_list:
-		for i in range(0,len(points)):
-			for j in range(i+1,len(points)):
-				line_list.append((points[i],points[j]))
+		for point in points:
+			obstacle_points.append(point)
+		for i in range(0,len(points)-1):
+			j = i+1
+			line_list.append((points[i],points[j]))
 
 	for node in pathnodes:
 		tmp = copy.copy(pathnodes)
@@ -62,8 +66,13 @@ def myBuildPathNetwork(pathnodes, world, agent = None):
 		if point_dict.get(source,None):
 			target_list = point_dict[source]
 			for target in target_list:
-				lines.append((source,target))
+				skip = False
+				for point in obstacle_points:
+					if minimumDistance((source,target),point) < maxRadius:
+						skip = True
+				if not skip:
+					lines.append((source,target))
 			
 			point_dict.pop(source, None)
-			
+
 	return lines
