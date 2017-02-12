@@ -43,15 +43,27 @@ def myBuildPathNetwork(pathnodes, world, agent = None):
 	for node in pathnodes:
 		tmp = copy.copy(pathnodes)
 		tmp.remove(node)
-		closest = findClosestUnobstructed(node,tmp,line_list)
-		if closest:
-			point_dict[node] = closest
+
+		while tmp and findClosestUnobstructed(node,tmp,line_list):
+			closest = findClosestUnobstructed(node,tmp,line_list)
+
+			if point_dict.get(node,None):
+				arr = point_dict[node]
+				arr.append(closest)
+				point_dict[node] = arr
+			else:
+				arr = []
+				arr.append(closest)
+				point_dict[node] = arr
+
+			tmp.remove(closest)
 
 	for source in pathnodes:
 		if point_dict.get(source,None):
-			target = point_dict[source]
+			target_list = point_dict[source]
+			for target in target_list:
+				lines.append((source,target))
+			
 			point_dict.pop(source, None)
-			lines.append((source,target))
-
-
+			
 	return lines
