@@ -222,7 +222,7 @@ def clearShot(p1, p2, worldLines, worldPoints, agent):
     
     if rayTraceWorld(p1,p2,worldLines) is None:     # no intersection
         for point in worldPoints:
-            if minimumDistance((p1,p2),point) <= agent.getMaxRadius()
+            if minimumDistance((p1,p2),point) <= agent.getMaxRadius() * 2:
                 return False    # plausible intersection
         return True
     else:   # intersection
