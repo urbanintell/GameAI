@@ -203,6 +203,24 @@ def myUpdate(nav, delta):
         nav.setPath([])
         agent.stopMoving()
 
+    # handling edge case where target is really close to the obstacle
+    # new_target_arr = []
+
+    # offset = agent.getMaxRadius()
+    # new_target_arr.append((current_target[0]+offset, current_target[1]))
+    # new_target_arr.append((current_target[0], current_target[1]+offset))
+    # new_target_arr.append((current_target[0]+offset, current_target[1]+offset))
+    # new_target_arr.append((current_target[0]-offset, current_target[1])  )
+    # new_target_arr.append((current_target[0], current_target[1]-offset))
+    # new_target_arr.append((current_target[0]-offset, current_target[1]-offset))
+    # new_target_arr.append((current_target[0]+offset, current_target[1]-offset))
+    # new_target_arr.append((current_target[0]-offset, current_target[1]+offset))
+    
+    # for i in range(len(new_target_arr)):
+    #     if rayTraceWorld(current_source,new_target_arr[i],obstacles) is not None:
+    #         nav.setPath([])
+    #         agent.stopMoving()
+
     return None
 
 
@@ -222,7 +240,7 @@ def clearShot(p1, p2, worldLines, worldPoints, agent):
     
     if rayTraceWorld(p1,p2,worldLines) is None:     # no intersection
         for point in worldPoints:
-            if minimumDistance((p1,p2),point) <= agent.getMaxRadius() * 2:
+            if minimumDistance((p1,p2),point) <= agent.getMaxRadius():
                 return False    # plausible intersection
         return True
     else:   # intersection
