@@ -174,7 +174,7 @@ class Move(State):
 
 				if not stop_at_tower:
 					for base in bases:
-						if base.isAlive():
+						if base.isAlive() and len(towers) <= 0:
 							if distance(agent_pos, base.position) <= bullet_range:
 								visible_bases = self.agent.getVisibleType(Base)
 								# TODO: if visible base position is same as nearest base, only then stop
