@@ -28,11 +28,9 @@ class MyMinion(Minion):
 	
 	def __init__(self, position, orientation, world, image = NPC, speed = SPEED, viewangle = 360, hitpoints = HITPOINTS, firerate = FIRERATE, bulletclass = SmallBullet):
 		Minion.__init__(self, position, orientation, world, image, speed, viewangle, hitpoints, firerate, bulletclass)
-		self.states = [Idle, Move, AttackTower, AttackBase]
+		self.states = [Idle, Move, AttackTower, AttackBase, AttackMinions]
 		### Add your states to self.states (but don't remove Idle)
-		### YOUR CODE GOES BELOW HERE ###
 
-		### YOUR CODE GOES ABOVE HERE ###
 
 	def start(self):
 		Minion.start(self)
@@ -90,8 +88,6 @@ class Move(State):
 
 	def enter(self, oldstate):
 		State.enter(self, oldstate)
-		
-		# print "Entered Move State"
 
 		if self.agent.isAlive():
 			my_team = self.agent.getTeam()
@@ -153,7 +149,7 @@ class Move(State):
 				for tower in towers:
 					if distance(agent_pos,tower.position) <= bullet_range:
 						visible_towers = self.agent.getVisibleType(Tower)
-						# TODO: if visible tower position is same as nearest tower, only then stop
+
 						if len(towers) > 0:
 							self.agent.stopMoving()
 							self.agent.navigator.destination = tower.position
@@ -161,16 +157,6 @@ class Move(State):
 							self.agent.changeState(AttackTower,[Move])
 							stop_at_tower = True
 							break
-
-				# if self.agent.navigator.destination:
-				# 	if distance(agent_pos, self.agent.navigator.destination) <= bullet_range:
-				# 		visible_towers = self.agent.getVisibleType(Tower)
-				# 		# TODO: if visible tower position is same as nearest tower, only then stop
-				# 		if len(towers) > 0:
-				# 			self.agent.stopMoving()
-				# 			self.agent.turnToFace(tower.position)
-				# 			self.agent.changeState(AttackTower,[Move])
-				# 			stop_at_tower = True
 
 				if not stop_at_tower:
 					for base in bases:
@@ -183,6 +169,18 @@ class Move(State):
 								self.agent.turnToFace(base.position)
 								self.agent.changeState(AttackBase,[Move])
 								break
+
+				visible_minions = self.agent.getVisibleType(Minion)
+				enemy_npcs = self.agent.world.getEnemyNPCs(my_team)
+
+				for minion in visible_minions:
+					if minion in enemy_npcs and minion.isAlive():
+						if distance(agent_pos,minion.position) <= bullet_range:
+							self.agent.stopMoving()
+							self.agent.turnToFace(minion.position)
+							self.agent.shoot()
+							self.agent.changeState(AttackMinions,[Move])
+							break
 
 				if len(bases) == 0:
 					self.agent.changeState(Idle,[Move])
@@ -208,7 +206,6 @@ class AttackTower(State):
 	def enter(self, oldstate):
 		State.enter(self, oldstate)
 
-		# print "Entered AttackTower State"
 		self.agent.stopMoving()
 
 		bullet_range = None
@@ -256,14 +253,7 @@ class AttackTower(State):
 					if tower.isAlive():
 						self.agent.changeState(Move,[AttackTower])
 						break
-						# if distance(agent_pos, tower.position) <= bullet_range:
-						# 	self.agent.turnToFace(tower.position)
-						# 	self.agent.shoot()
-						# 	self.agent.navigator.destination = tower.position
-						# 	break
-						# else:
-						# 	self.agent.changeState(Move,[AttackTower])
-						# 	break
+						
 			if len(towers) == 0:
 				self.agent.changeState(Move,[AttackTower])
 
@@ -303,8 +293,6 @@ class AttackBase(State):
 
 			for base in bases:
 				if base.isAlive():		# redundant check
-					# if base.position == self.agent.navigator.destination:
-					# 	if distance(agent_pos, base.position) <= bullet_range:
 					self.agent.turnToFace(base.position)
 					self.agent.shoot()
 
@@ -331,27 +319,86 @@ class AttackBase(State):
 						didAttack = True
 						break
 
-			# if not didAttack:		# Base being attacked previously died, change focus
-			# 	for base in bases:
-			# 		if base.isAlive():		# redundant check
-			# 			self.agent.changeState(Move,[AttackBase])
-			# 			break
-						# if distance(agent_pos, base.position) <= bullet_range:
-						# 	self.agent.turnToFace(base.position)
-						# 	self.agent.shoot()
-						# 	break
-						# else:
-						# 	self.agent.changeState(Move,[AttackBase])
-						# 	break
-
-					# else:
-					# 	if not self.agent.navigator.destination == base.position:
-					# 		self.agent.changeState(Idle,[AttackBase])
-					# 		break
-
 			if len(bases) == 0:
 				# print "going to idle state"
 				self.agent.changeState(Idle,[AttackBase])
+
+		return None
+
+
+	def exit(self):
+		State.exit(self)
+
+
+##############################
+### Attack Minions
+###
+### This is a state used for shooting at enemy minions.
+### We exit out of this state once there are no visible enemy minions in our range
+### and go back to Move State
+
+
+class AttackMinions(State):
+
+	def enter(self, oldstate):
+		State.enter(self, oldstate)
+
+		if self.agent.isAlive():
+			my_team = self.agent.getTeam()
+			agent_pos = self.agent.position
+			self.agent.stopMoving()
+
+			bullet_range = None
+			if isinstance(self.agent.bulletclass,SmallBullet):
+				bullet_range = SMALLBULLETRANGE		# TODO: get bullet range automatically by class type checking
+			else:
+				bullet_range = SMALLBULLETRANGE
+
+			visible_minions = self.agent.getVisibleType(Minion)
+			enemy_npcs = self.agent.world.getEnemyNPCs(my_team)
+
+			for minion in visible_minions:
+				if minion in enemy_npcs and minion.isAlive():
+					if distance(agent_pos,minion.position) <= bullet_range:
+						self.agent.stopMoving()
+						self.agent.turnToFace(minion.position)
+						self.agent.shoot()
+						break
+
+
+	def execute(self, delta = 0):
+		State.execute(self, delta)
+
+		bullet_range = None
+		if isinstance(self.agent.bulletclass,SmallBullet):
+			bullet_range = SMALLBULLETRANGE		# TODO: get bullet range automatically by class type checking
+		else:
+			bullet_range = SMALLBULLETRANGE
+
+		if self.agent.isAlive():
+			my_team = self.agent.getTeam()
+			agent_pos = self.agent.position
+
+			bullet_range = None
+			if isinstance(self.agent.bulletclass,SmallBullet):
+				bullet_range = SMALLBULLETRANGE		# TODO: get bullet range automatically by class type checking
+			else:
+				bullet_range = SMALLBULLETRANGE
+
+			visible_minions = self.agent.getVisibleType(Minion)
+			enemy_npcs = self.agent.world.getEnemyNPCs(my_team)
+
+			found_minion = False
+			for minion in visible_minions:
+				if minion in enemy_npcs and minion.isAlive():
+					if distance(agent_pos,minion.position) <= bullet_range:
+						self.agent.turnToFace(minion.position)
+						self.agent.shoot()
+						found_minion = True
+						break
+
+			if not found_minion:
+				self.agent.changeState(Move,[AttackMinions])
 
 		return None
 
