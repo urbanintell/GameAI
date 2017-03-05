@@ -148,14 +148,29 @@ class Move(State):
 							break
 			else:
 				stop_at_tower = False
-				if self.agent.navigator.destination:
-					if distance(agent_pos, self.agent.navigator.destination) <= bullet_range:
+
+				# check for the nearest tower and stop
+				for tower in towers:
+					if distance(agent_pos,tower.position) <= bullet_range:
 						visible_towers = self.agent.getVisibleType(Tower)
 						# TODO: if visible tower position is same as nearest tower, only then stop
 						if len(towers) > 0:
 							self.agent.stopMoving()
+							self.agent.navigator.destination = tower.position
+							self.agent.turnToFace(tower.position)
 							self.agent.changeState(AttackTower,[Move])
 							stop_at_tower = True
+							break
+
+				# if self.agent.navigator.destination:
+				# 	if distance(agent_pos, self.agent.navigator.destination) <= bullet_range:
+				# 		visible_towers = self.agent.getVisibleType(Tower)
+				# 		# TODO: if visible tower position is same as nearest tower, only then stop
+				# 		if len(towers) > 0:
+				# 			self.agent.stopMoving()
+				# 			self.agent.turnToFace(tower.position)
+				# 			self.agent.changeState(AttackTower,[Move])
+				# 			stop_at_tower = True
 
 				if not stop_at_tower:
 					for base in bases:
@@ -164,6 +179,8 @@ class Move(State):
 								visible_bases = self.agent.getVisibleType(Base)
 								# TODO: if visible base position is same as nearest base, only then stop
 								self.agent.stopMoving()
+								self.agent.navigator.destination = base.position
+								self.agent.turnToFace(base.position)
 								self.agent.changeState(AttackBase,[Move])
 								break
 
@@ -270,7 +287,7 @@ class AttackBase(State):
 	def enter(self, oldstate):
 		State.enter(self, oldstate)
 
-		print "Entered AttackBase State"
+		# print "Entered AttackBase State"
 		self.agent.stopMoving()
 
 		bullet_range = None
@@ -333,7 +350,7 @@ class AttackBase(State):
 					# 		break
 
 			if len(bases) == 0:
-				print "going to idle state"
+				# print "going to idle state"
 				self.agent.changeState(Idle,[AttackBase])
 
 		return None
