@@ -23,6 +23,7 @@ from constants import *
 from utils import *
 from core import *
 from moba import *
+import random
 
 class MyMinion(Minion):
 	
@@ -98,14 +99,20 @@ class Move(State):
 
 			for tower in towers:
 				if tower.isAlive():			# redundant check
-					self.agent.navigator.computePath(agent_pos, tower.position)
+					tower_pos = tower.position
+					pos_arr = [(tower_pos[0]-30,tower_pos[1]),(tower_pos[0]-30,tower_pos[1]-30),(tower_pos[0],tower_pos[1]-30)]
+					index = random.randint(1, 3)
+					self.agent.navigator.computePath(agent_pos, pos_arr[index-1])
 					moving_to_tower = True
 					break
 
 			if not moving_to_tower:			# Already moving to tower, skip checking for base
 				for base in bases:
 					if base.isAlive():		# redundant check
-						self.agent.navigator.computePath(agent_pos, base.position)
+						base_pos = base.position
+						pos_arr = [(base_pos[0]-30,base_pos[1]),(base_pos[0]-30,base_pos[1]-30),(base_pos[0],base_pos[1]-30)]
+						index = random.randint(1,3)
+						self.agent.navigator.computePath(agent_pos, pos_arr[index-1])
 						break
 
 			if len(bases) == 0:
@@ -133,14 +140,20 @@ class Move(State):
 			if not self.agent.isMoving():
 				for tower in towers:
 					if tower.isAlive():
-						self.agent.navigator.computePath(agent_pos, tower.position)
+						tower_pos = tower.position
+						pos_arr = [(tower_pos[0]-30,tower_pos[1]),(tower_pos[0]-30,tower_pos[1]-30),(tower_pos[0],tower_pos[1]-30)]
+						index = random.randint(1, 3)
+						self.agent.navigator.computePath(agent_pos, pos_arr[index-1])
 						moving_to_tower = True
 						break
 
 				if not moving_to_tower:
 					for base in bases:
 						if base.isAlive():
-							self.agent.navigator.computePath(agent_pos, base.position)
+							base_pos = base.position
+							pos_arr = [(base_pos[0]-30,base_pos[1]),(base_pos[0]-30,base_pos[1]-30),(base_pos[0],base_pos[1]-30)]
+							index = random.randint(1,3)
+							self.agent.navigator.computePath(agent_pos, pos_arr[index-1])
 							break
 			else:
 				stop_at_tower = False
