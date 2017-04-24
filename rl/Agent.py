@@ -10,8 +10,6 @@ from random import Random
 
 
 
-
-
 class Agent:
 	# Random generator
 	randGenerator=Random()
@@ -107,7 +105,6 @@ class Agent:
 			if self.isVerbose():
 				print "reward:", reward.rewardValue
 
-			
 			self.totalReward = self.totalReward + reward.rewardValue
 			self.workingObservation = copy.deepcopy(currentObs)
 
@@ -116,6 +113,7 @@ class Agent:
         
 		if self.isVerbose():
 			print("END")
+
 		return history
 	
 
@@ -164,7 +162,6 @@ class Agent:
 			# increment total reward
 			self.totalReward = self.totalReward + reward.rewardValue
 
-
 		# Done learning, reset environment
 		self.gridEnvironment.env_reset()
 
@@ -181,6 +178,14 @@ class Agent:
 	def updateVtable(self, newState, lastState, action, reward, terminal, availableActions):
 		# YOUR CODE GOES BELOW HERE
 
+		last_state = self.calculateFlatState(lastState)
+		if terminal:
+			self.v_table[last_state][action] = self.v_table[last_state][action] + self.learningRate*(reward - self.v_table[last_state][action])
+		else:
+			new_state = self.calculateFlatState(newState)
+			max_val = max(self.v_table[new_state])
+			self.v_table[last_state][action] = self.v_table[last_state][action] + self.learningRate*(reward + self.gamma*max_val - self.v_table[last_state][action])
+
 		# YOUR CODE GOES ABOVE HERE
 		return None
 
@@ -193,9 +198,16 @@ class Agent:
 	### Return the index of the action picked.
 	def egreedy(self, observation):
 		# YOUR CODE GOES BELOW HERE
-
+		num = random.uniform(0,1)
+		if num < self.epsilon:
+			rand_action = random.randint(0,len(observation.availableActions)-1)
+			return observation.availableActions[rand_action]
+		else:
+			state = self.calculateFlatState(observation.worldState)
+			action = self.v_table[state].index(max(self.v_table[state]))
+			return action
 		# YOUR CODE GOES ABOVE HERE
-		return 0
+		# return 0
 
 
 	### Return the best action according to the policy
@@ -206,9 +218,10 @@ class Agent:
 	def greedy(self, observation):
 		self.initializeVtableStateEntry(observation.worldState)
 		# YOUR CODE GOES BELOW HERE
-
+		state = self.calculateFlatState(observation.worldState)
+		action = self.v_table[state].index(max(self.v_table[state]))
 		# YOUR CODE GOES ABOVE HERE
-		return 0
+		return action
 	
 
 	# Reset the agent
@@ -233,8 +246,6 @@ class Agent:
 	
 	# Turn the state into a tuple for bookkeeping
 	def calculateFlatState(self, theState):
-		print "STATE"
-		print theState
 		return tuple(theState)
 
 	def isVerbose(self):
